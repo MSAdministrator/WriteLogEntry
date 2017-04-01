@@ -1,0 +1,5 @@
+20170401T055438 [INFO]: This is an informational log event
+20170401T055440 [DEBUG]: This is an debugging log event
+20170401T055442 [ERROR]: This is an error log event
+20170401T055444 [ERROR]: This is an error log event
+20170401T055444 [ERROR]: The term 'do-something' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again. (CommandNotFoundException: :1 char:7)
