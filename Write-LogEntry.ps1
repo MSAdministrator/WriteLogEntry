@@ -85,7 +85,7 @@
 #>
 function Write-LogEntry
 {
-    [CmdletBinding(DefaultParameterSetName = 'Info', 
+    [CmdletBinding(DefaultParameterSetName = '', 
                   SupportsShouldProcess=$true, 
                   PositionalBinding=$false,
                   HelpUri = 'http://www.microsoft.com/',
@@ -93,63 +93,54 @@ function Write-LogEntry
     [OutputType()]
     Param
     (
-        # Information type of log entry
+        # The error type of log entry
+        [Parameter(Mandatory=$false, 
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true
+                   )]
+        [ValidateSet('Info','Debug','Error')]
+        $Type,
+        
+        # Message to log
         [Parameter(Mandatory=$true, 
                    ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true, 
-                   ValueFromRemainingArguments=$false, 
-                   Position=0,
-                   ParameterSetName = 'Info')]
+                   ValueFromPipelineByPropertyName=$true
+                   )]
         [ValidateNotNull()]
         [ValidateNotNullOrEmpty()]
-        [Alias("information")]
-        [System.String]$Info,
-
-        # Debug type of log entry
-        [Parameter(Mandatory=$true, 
-                   ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true, 
-                   ValueFromRemainingArguments=$false, 
-                   Position=0,
-                   ParameterSetName = 'Debug')]
-        [ValidateNotNull()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]$Debugging,
-
-        # Error type of log entry
-        [Parameter(Mandatory=$true, 
-                   ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true, 
-                   ValueFromRemainingArguments=$false, 
-                   Position=0,
-                   ParameterSetName = 'Error')]
-        [ValidateNotNull()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]$Error,
-
+        [System.String]$Message,
 
         # The error record containing an exception to log
         [Parameter(Mandatory=$false, 
-                   ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true, 
-                   ValueFromRemainingArguments=$false, 
-                   Position=1,
-                   ParameterSetName = 'Error')]
+                   ValueFromPipelineByPropertyName=$true
+                   )]
         [ValidateNotNull()]
         [ValidateNotNullOrEmpty()]
-        [Alias("record")]
         [System.Management.Automation.ErrorRecord]$ErrorRecord,
 
         # Logfile location
         [Parameter(Mandatory=$false, 
-                   ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true, 
-                   ValueFromRemainingArguments=$false, 
-                   Position=2)]
+                   ValueFromPipelineByPropertyName=$true,  
+                   ParameterSetName = 'LogFile')]
         [Alias("file", "location")]
-        [System.String]$LogFile = "$($ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(‘.\’))" + "\log.log"
+        [System.String]$LogFile = "$($ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(‘.\’))" + "\log.log",
+
+        # Error type of log entry
+        [Parameter(Mandatory=$true, 
+                   ValueFromPipelineByPropertyName=$true, 
+                   ParameterSetName = 'EventLog')]
+        [ValidateNotNull()]
+        [ValidateNotNullOrEmpty()]
+        [int]$EventId,
+        
+        # Logfile location
+        [Parameter(Mandatory=$true, 
+                   ValueFromPipelineByPropertyName=$true, 
+                   ParameterSetName = 'EventLog')]
+        [System.String]$Source
     )
 
+    
     Begin
     {
         if (!(Test-Path -Path $LogFile))
@@ -173,9 +164,27 @@ function Write-LogEntry
         {
             'Error' 
             {
-                $mutex.waitone() | Out-Null
+                if ($Source)
+                {
+                    $props = @{
+                        'LogName'='Application'
+                        'EntryType'='Error'
+                        'Message'=$Error
+                        'Source'=$Source
+                        'EventId'=$EventId
+                    }
 
-                Add-Content -Path $LogFile -Value "$((Get-Date).ToString('yyyyMMddThhmmss')) [ERROR]: $Error"
+                    Write-EventLog @props
+                }
+                else
+                {
+                    $mutex.waitone() | Out-Null
+
+                    Add-Content -Path $LogFile -Value "$((Get-Date).ToString('yyyyMMddThhmmss')) [ERROR]: $Error"
+
+                    $mutex.ReleaseMutex() | Out-Null
+                }
+                
 
                 if ($PSBoundParameters.ContainsKey('ErrorRecord'))
                 {
@@ -185,18 +194,48 @@ function Write-LogEntry
                                                                 $ErrorRecord.InvocationInfo.ScriptLineNumber,
                                                                 $ErrorRecord.InvocationInfo.OffsetInLine
 
-                    Add-Content -Path $LogFile -Value "$((Get-Date).ToString('yyyyMMddThhmmss')) [ERROR]: $Message"
-                }
+                    if ($Source)
+                    {
+                        $props = @{
+                            'LogName'='Application'
+                            'EntryType'='Error'
+                            'Message'=$Message
+                            'Source'=$Source
+                            'EventId'=$EventId
+                        }
 
-                $mutex.ReleaseMutex() | Out-Null
+                        Write-EventLog @props
+                    }
+                    else
+                    {
+                        $mutex.waitone() | Out-Null
+                        Add-Content -Path $LogFile -Value "$((Get-Date).ToString('yyyyMMddThhmmss')) [ERROR]: $Message"
+                        $mutex.ReleaseMutex() | Out-Null
+                    }
+                }
             }
             'Info' 
             {
-                $mutex.waitone() | Out-Null
+                if ($Source)
+                {
+                    $props = @{
+                        'LogName'='Application'
+                        'EntryType'='Information'
+                        'Message'=$Info
+                        'Source'=$Source
+                        'EventId'=$EventId
+                    }
 
-                Add-Content -Path $LogFile -Value "$((Get-Date).ToString('yyyyMMddThhmmss')) [INFO]: $Info"
+                    Write-EventLog @props
+                }
+                else
+                {
+                    $mutex.waitone() | Out-Null
+
+                    Add-Content -Path $LogFile -Value "$((Get-Date).ToString('yyyyMMddThhmmss')) [INFO]: $Info"
                 
-                $mutex.ReleaseMutex() | Out-Null
+                    $mutex.ReleaseMutex() | Out-Null
+                }
             }
             'Debugging' 
             {
