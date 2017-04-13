@@ -1,5 +1,5 @@
-20170401T055438 [INFO]: This is an informational log event
-20170401T055440 [DEBUG]: This is an debugging log event
-20170401T055442 [ERROR]: This is an error log event
-20170401T055444 [ERROR]: This is an error log event
-20170401T055444 [ERROR]: The term 'do-something' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again. (CommandNotFoundException: :1 char:7)
+20170413T033149 [INFO]: This is an informational log event
+20170413T033149 [DEBUG]: This is an debugging log event
+20170413T033149 [ERROR]: This is an error log event
+20170413T033149 [ERROR]: Error calling Do-SomethingElse
+20170413T033149 [ERROR]: The term 'Do-SomethingElse' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again. (CommandNotFoundException: :6 char:5)

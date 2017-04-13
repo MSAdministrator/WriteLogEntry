@@ -95,9 +95,7 @@ function Write-LogEntry
     (
         # Information type of log entry
         [Parameter(Mandatory=$true, 
-                   ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true, 
-                   ValueFromRemainingArguments=$false, 
+                   ValueFromPipelineByPropertyName=$true,
                    Position=0,
                    ParameterSetName = 'Info')]
         [ValidateNotNull()]
@@ -107,9 +105,7 @@ function Write-LogEntry
 
         # Debug type of log entry
         [Parameter(Mandatory=$true, 
-                   ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true, 
-                   ValueFromRemainingArguments=$false, 
                    Position=0,
                    ParameterSetName = 'Debug')]
         [ValidateNotNull()]
@@ -119,8 +115,6 @@ function Write-LogEntry
         # Error type of log entry
         [Parameter(Mandatory=$true, 
                    ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true, 
-                   ValueFromRemainingArguments=$false, 
                    Position=0,
                    ParameterSetName = 'Error')]
         [ValidateNotNull()]
@@ -142,9 +136,7 @@ function Write-LogEntry
 
         # Logfile location
         [Parameter(Mandatory=$false, 
-                   ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true, 
-                   ValueFromRemainingArguments=$false, 
                    Position=2)]
         [Alias("file", "location")]
         [System.String]$LogFile = "$($ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(‘.\’))" + "\log.log"
