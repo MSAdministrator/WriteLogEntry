@@ -43,28 +43,28 @@
                                      or if a path was included, verify that the path is correct and try again. `
                                      (CommandNotFoundException: :1 char:7)
 .EXAMPLE
-   Function call
         Write-LogEntry -Info 'This is an informational log event'
-    Output
+        
+        Output
         20170401T055438 [INFO]: This is an informational log event
 .EXAMPLE
-   Function call
         Write-LogEntry -Debugging 'This is an debugging log event'
-    Output
+    
+        Output
         20170401T055440 [DEBUG]: This is an debugging log event
 .EXAMPLE
-    Function call
         Write-LogEntry -Error 'This is an error log event'
-    Output
+        
+        Output
         20170401T055442 [ERROR]: This is an error log event
 .EXAMPLE
-    Function call
         try { 
             do-something 
         } catch { 
             Write-LogEntry -Error 'This is an error log event' -ErrorRecord $Error[0] 
         }
-    Output
+    
+        Output
         20170401T055444 [ERROR]: This is an error log event
         20170401T055444 [ERROR]: The term 'do-something' is not recognized as the name of a cmdlet, `
                                  function, script file, or operable program. Check the spelling of the name, `
@@ -77,7 +77,7 @@
 .NOTES
    Name: Write-LogEntry
    Created by: Josh Rickard
-   Created Date: 04/01/2017
+   Created Date: 11/24/2016
 .FUNCTIONALITY
    Write-LogEntry is a PowerShell helper function that will accept or create a log file and
    add strings based on severity, as well as parse $error[0] records for easy interpretation
@@ -88,7 +88,7 @@ function Write-LogEntry
     [CmdletBinding(DefaultParameterSetName = 'Info', 
                   SupportsShouldProcess=$true, 
                   PositionalBinding=$false,
-                  HelpUri = 'http://www.microsoft.com/',
+                  HelpUri = 'https://github.com/MSAdministrator/WriteLogEntry',
                   ConfirmImpact='Medium')]
     [OutputType()]
     Param
