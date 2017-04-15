@@ -1,0 +1,11 @@
+PSTOPIC
+    about_WriteLogEntry
+
+SHORT DESCRIPTION
+    A PowerShell helper function to create and write information to a log file
+
+LONG DESCRIPTION
+    This function will write to a log file. You can specify if the log type is: Informational (Info),     Debugging (Debugging), and Error (Error). This function will by default create a log file in the         parent folder of the calling scope, but you can specify a seperate log location if you choose.
+
+DETAILED DESCRIPTION
+    This function will write to a log file. You can specify if the log type is: Informational (Info),         Debugging (Debugging), and Error (Error). This function will by default create a log file in the          parent folder of the calling scope, but you can specify a seperate log location if you choose.
