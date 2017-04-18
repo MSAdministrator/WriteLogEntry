@@ -125,7 +125,6 @@ function Write-LogEntry
         [Parameter(Mandatory=$false, 
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true, 
-                   ValueFromRemainingArguments=$false, 
                    Position=1,
                    ParameterSetName = 'Error')]
         [ValidateNotNull()]
@@ -141,68 +140,60 @@ function Write-LogEntry
         [System.String]$LogFile = "$($ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(‘.\’))" + "\log.log"
     )
 
-    Begin
-    {
-        if (!(Test-Path -Path $LogFile))
-        {
-            try
-            {
-                New-Item -Path $LogFile -ItemType File -Force | Out-Null
-            }
-            catch
-            {
-                Write-Error -Message 'Error creating log file'
-                break
-            }
-        }
+     if (!(Test-Path -Path $LogFile))
+     {
+         try
+         {
+             New-Item -Path $LogFile -ItemType File -Force | Out-Null
+         }
+         catch
+         {
+             Write-Error -Message 'Error creating log file'
+             break
+         }
+     }
 
-        $mutex = New-Object -TypeName 'Threading.Mutex' -ArgumentList $false, 'MyInterprocMutex'
-    } # end of Begin block
-    Process
-    {
-        switch ($PSBoundParameters.Keys)
-        {
-            'Error' 
-            {
-                $mutex.waitone() | Out-Null
+     # Creating a new mutex object
+     $mutex = New-Object -TypeName 'Threading.Mutex' -ArgumentList $false, 'MyInterprocMutex'
 
-                Add-Content -Path $LogFile -Value "$((Get-Date).ToString('yyyyMMddThhmmss')) [ERROR]: $Error"
+     switch ($PSBoundParameters.Keys)
+     {
+         'Error' 
+         {
+             $mutex.waitone() | Out-Null
 
-                if ($PSBoundParameters.ContainsKey('ErrorRecord'))
-                {
-                    $Message = '{0} ({1}: {2}:{3} char:{4})' -f $ErrorRecord.Exception.Message,
-                                                                $ErrorRecord.FullyQualifiedErrorId,
-                                                                $ErrorRecord.InvocationInfo.ScriptName,
-                                                                $ErrorRecord.InvocationInfo.ScriptLineNumber,
-                                                                $ErrorRecord.InvocationInfo.OffsetInLine
+             Add-Content -Path $LogFile -Value "$((Get-Date).ToString('yyyyMMddThhmmss')) [ERROR]: $Error"
 
-                    Add-Content -Path $LogFile -Value "$((Get-Date).ToString('yyyyMMddThhmmss')) [ERROR]: $Message"
-                }
+             if ($PSBoundParameters.ContainsKey('ErrorRecord'))
+             {
+                 $Message = '{0} ({1}: {2}:{3} char:{4})' -f $ErrorRecord.Exception.Message,
+                                                             $ErrorRecord.FullyQualifiedErrorId,
+                                                             $ErrorRecord.InvocationInfo.ScriptName,
+                                                             $ErrorRecord.InvocationInfo.ScriptLineNumber,
+                                                             $ErrorRecord.InvocationInfo.OffsetInLine
 
-                $mutex.ReleaseMutex() | Out-Null
-            }
-            'Info' 
-            {
-                $mutex.waitone() | Out-Null
+                 Add-Content -Path $LogFile -Value "$((Get-Date).ToString('yyyyMMddThhmmss')) [ERROR]: $Message"
+             }
 
-                Add-Content -Path $LogFile -Value "$((Get-Date).ToString('yyyyMMddThhmmss')) [INFO]: $Info"
-                
-                $mutex.ReleaseMutex() | Out-Null
-            }
-            'Debugging' 
-            {
-                Write-Debug -Message "$Debugging"
+             $mutex.ReleaseMutex() | Out-Null
+         }
+         'Info' 
+         {
+             $mutex.waitone() | Out-Null
 
-                $mutex.waitone() | Out-Null
-                
-                Add-Content -Path $LogFile -Value "$((Get-Date).ToString('yyyyMMddThhmmss')) [DEBUG]: $Debugging"
-                
-                $mutex.ReleaseMutex() | Out-Null
-            }
-        }
-    } # end of Process block
-    End
-    {
-        # intentionally left blank
-    } # end of End block
+             Add-Content -Path $LogFile -Value "$((Get-Date).ToString('yyyyMMddThhmmss')) [INFO]: $Info"
+
+             $mutex.ReleaseMutex() | Out-Null
+         }
+         'Debugging' 
+         {
+             Write-Debug -Message "$Debugging"
+
+             $mutex.waitone() | Out-Null
+
+             Add-Content -Path $LogFile -Value "$((Get-Date).ToString('yyyyMMddThhmmss')) [DEBUG]: $Debugging"
+
+             $mutex.ReleaseMutex() | Out-Null
+         }
+     }# End of switch statement
 } # end of Write-LogEntry function
