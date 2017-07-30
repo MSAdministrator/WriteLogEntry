@@ -137,7 +137,7 @@ function Write-LogEntry
                    ValueFromPipelineByPropertyName=$true, 
                    Position=2)]
         [Alias("file", "location")]
-        [System.String]$LogFile = "$($ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(‘.\’))" + "\log.log"
+        [System.String]$LogFile = "$($ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath('.\'))" + "\log.log"
     )
 
      if (!(Test-Path -Path $LogFile))
